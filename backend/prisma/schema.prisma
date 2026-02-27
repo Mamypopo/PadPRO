@@ -1,0 +1,55 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id        String     @id @default(uuid())
+  username  String     @unique
+  password  String?    // สำหรับ Password ปกติ
+  pattern   String?    // สำหรับเก็บ Pattern Lock เช่น "235487"
+  avatarUrl String?
+  categories Category[]
+  tasks      Task[]
+  activityLogs ActivityLog[]
+}
+
+model Category {
+  id     String @id @default(uuid())
+  name   String
+  color  String @default("#3b82f6") // สี Default (blue-500)
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+  tasks  Task[]
+}
+
+model Task {
+  id         String   @id @default(uuid())
+  title      String
+  content    String?  @db.Text // สำหรับ Markdown
+  status     String   @default("TODO")
+  priority   String   @default("MEDIUM")
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id])
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model ActivityLog {
+  id        String   @id @default(uuid())
+  action    String   // เช่น "LOGIN", "CREATE_TASK", "DELETE_CATEGORY"
+  details   String?  // เก็บข้อมูลเพิ่มเติม เช่น "Created task: Setup Prisma"
+  ipAddress String?  // สำหรับความปลอดภัยเวลาใช้ในบริษัท
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
