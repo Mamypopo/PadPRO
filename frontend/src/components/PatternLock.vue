@@ -1,125 +1,144 @@
 <template>
-    <div class="flex flex-col items-center justify-center space-y-4">
-      <canvas 
-        ref="canvas" 
-        class="touch-none cursor-crosshair bg-background rounded-3xl border border-border-light shadow-inner"
-        @mousedown="startDrawing"
-        @mousemove="draw"
-        @mouseup="stopDrawing"
-        @touchstart="startDrawing"
-        @touchmove="draw"
-        @touchend="stopDrawing"
-      ></canvas>
-      <button @click="resetPattern" class="text-[10px] text-primary font-bold uppercase tracking-widest hover:underline">
-        Clear Pattern
-      </button>
-    </div>
-  </template>
+  <div class="flex flex-col items-center justify-center space-y-4">
+    <canvas ref="canvas"
+      class="touch-none cursor-crosshair bg-background rounded-3xl border border-border-light shadow-inner"
+      @mousedown="startDrawing" @mousemove="draw" @mouseup="stopDrawing" @touchstart="startDrawing" @touchmove="draw"
+      @touchend="stopDrawing"></canvas>
+    <button @click="resetPattern" class="text-[10px] text-primary font-bold uppercase tracking-widest hover:underline">
+      Clear Pattern
+    </button>
+  </div>
+</template>
+
+<script setup>
+import { ref, onMounted, reactive } from 'vue'
+
+const props = defineProps(['modelValue'])
+const emit = defineEmits(['update:modelValue'])
+
+const canvas = ref(null)
+const ctx = ref(null)
+const isDrawing = ref(false)
+const points = reactive([]) // เก็บพิกัดจุด 9 จุด
+const selectedPoints = ref([]) // เก็บ index ของจุดที่ลากผ่าน
+
+// --- ตั้งค่าสีตามระบบ ---
+const colors = {
+  dotDefault: '#404040',    // border-light
+  dotActive: '#CCFF00',     // accent (Electric Lime)
+  line: '#00A19B',          // primary (Petronas Teal)
+  glow: 'rgba(0, 161, 155, 0.5)' 
+}
+
+const initCanvas = () => {
+  const c = canvas.value
+  c.width = 280
+  c.height = 280
+  ctx.value = c.getContext('2d')
   
-  <script>
-  export default {
-    props: ['modelValue'],
-    data() {
-      return {
-        size: 300,
-        dots: [],
-        path: [],
-        isDrawing: false,
-        ctx: null
-      }
-    },
-    mounted() {
-      this.initCanvas();
-    },
-    methods: {
-      initCanvas() {
-        const canvas = this.$refs.canvas;
-        canvas.width = this.size;
-        canvas.height = this.size;
-        this.ctx = canvas.getContext('2d');
-        
-        // สร้างจุด 9 จุด (3x3)
-        const spacing = this.size / 4;
-        for (let i = 0; i < 3; i++) {
-          for (let j = 0; j < 3; j++) {
-            this.dots.push({
-              id: i * 3 + j,
-              x: (j + 1) * spacing,
-              y: (i + 1) * spacing
-            });
-          }
-        }
-        this.render();
-      },
-      getPos(e) {
-        const rect = this.$refs.canvas.getBoundingClientRect();
-        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-        return { x: clientX - rect.left, y: clientY - rect.top };
-      },
-      startDrawing(e) {
-        this.isDrawing = true;
-        this.path = [];
-        this.draw(e);
-      },
-      draw(e) {
-        if (!this.isDrawing) return;
-        const pos = this.getPos(e);
-        
-        // เช็คว่าลากผ่านจุดไหนไหม
-        this.dots.forEach(dot => {
-          const dist = Math.hypot(dot.x - pos.x, dot.y - pos.y);
-          if (dist < 25 && !this.path.includes(dot.id)) {
-            this.path.push(dot.id);
-            // เสียงสั้นๆ หรือ Haptic Feedback (ถ้ามี)
-          }
-        });
-        this.render(pos);
-      },
-      stopDrawing() {
-        this.isDrawing = false;
-        this.$emit('update:modelValue', this.path.join(''));
-        this.render();
-      },
-      resetPattern() {
-        this.path = [];
-        this.$emit('update:modelValue', '');
-        this.render();
-      },
-      render(currentPos = null) {
-        const { ctx, size, dots, path } = this;
-        ctx.clearRect(0, 0, size, size);
-  
-        // วาดเส้นที่ลากแล้ว
-        if (path.length > 0) {
-          ctx.beginPath();
-          ctx.strokeStyle = '#FF8000'; // McLaren Orange
-          ctx.lineWidth = 4;
-          ctx.lineJoin = 'round';
-          path.forEach((id, index) => {
-            const dot = dots[id];
-            if (index === 0) ctx.moveTo(dot.x, dot.y);
-            else ctx.lineTo(dot.x, dot.y);
-          });
-          if (currentPos && this.isDrawing) ctx.lineTo(currentPos.x, currentPos.y);
-          ctx.stroke();
-        }
-  
-        // วาดจุด
-        dots.forEach(dot => {
-          const isActive = path.includes(dot.id);
-          ctx.beginPath();
-          ctx.arc(dot.x, dot.y, 8, 0, Math.PI * 2);
-          ctx.fillStyle = isActive ? '#FF8000' : '#2C2C2E';
-          ctx.fill();
-          if (isActive) {
-            ctx.beginPath();
-            ctx.arc(dot.x, dot.y, 15, 0, Math.PI * 2);
-            ctx.strokeStyle = 'rgba(255, 128, 0, 0.3)';
-            ctx.stroke();
-          }
-        });
-      }
+  // คำนวณตำแหน่งจุด 9 จุด
+  const spacing = c.width / 4
+  for (let row = 0; row < 3; row++) {
+    for (let col = 0; col < 3; col++) {
+      points.push({
+        x: spacing * (col + 1),
+        y: spacing * (row + 1),
+        id: row * 3 + col
+      })
     }
   }
-  </script>
+  drawCanvas()
+}
+
+const drawCanvas = (currentX = null, currentY = null) => {
+  const v = ctx.value
+  v.clearRect(0, 0, canvas.value.width, canvas.value.height)
+
+  // 1. วาดเส้นเชื่อม (Petronas Teal)
+  if (selectedPoints.value.length > 0) {
+    v.beginPath()
+    v.lineWidth = 4
+    v.strokeStyle = colors.line
+    v.lineCap = 'round'
+    v.lineJoin = 'round'
+    
+    // เพิ่ม Glow ให้เส้น
+    v.shadowBlur = 10
+    v.shadowColor = colors.glow
+
+    selectedPoints.value.forEach((id, index) => {
+      const p = points[id]
+      if (index === 0) v.moveTo(p.x, p.y)
+      else v.lineTo(p.x, p.y)
+    })
+
+    if (currentX && currentY) {
+      const lastPoint = points[selectedPoints.value[selectedPoints.value.length - 1]]
+      v.lineTo(currentX, currentY)
+    }
+    v.stroke()
+    v.shadowBlur = 0 // ล้างค่าเงา
+  }
+
+  // 2. วาดจุด (Dot)
+  points.forEach((p) => {
+    const isActive = selectedPoints.value.includes(p.id)
+    
+    // วาดวงแหวนรอบนอก
+    v.beginPath()
+    v.arc(p.x, p.y, 8, 0, Math.PI * 2)
+    v.fillStyle = isActive ? colors.dotActive : colors.dotDefault
+    v.fill()
+
+    if (isActive) {
+      // เพิ่ม Glow ให้จุดที่ถูกเลือก (Electric Lime)
+      v.shadowBlur = 15
+      v.shadowColor = 'rgba(204, 255, 0, 0.6)'
+      v.beginPath()
+      v.arc(p.x, p.y, 4, 0, Math.PI * 2)
+      v.fillStyle = '#FFFFFF'
+      v.fill()
+      v.shadowBlur = 0
+    }
+  })
+}
+
+const startDrawing = (e) => {
+  isDrawing.value = true
+  handleMove(e)
+}
+
+const draw = (e) => {
+  if (!isDrawing.value) return
+  handleMove(e)
+}
+
+const handleMove = (e) => {
+  const rect = canvas.value.getBoundingClientRect()
+  const x = (e.clientX || e.touches[0].clientX) - rect.left
+  const y = (e.clientY || e.touches[0].clientY) - rect.top
+
+  // เช็คว่าลากผ่านจุดไหนไหม
+  points.forEach((p) => {
+    const dist = Math.sqrt((x - p.x) ** 2 + (y - p.y) ** 2)
+    if (dist < 20 && !selectedPoints.value.includes(p.id)) {
+      selectedPoints.value.push(p.id)
+      emit('update:modelValue', [...selectedPoints.value])
+    }
+  })
+  drawCanvas(x, y)
+}
+
+const stopDrawing = () => {
+  isDrawing.value = false
+  drawCanvas()
+}
+
+const resetPattern = () => {
+  selectedPoints.value = []
+  emit('update:modelValue', [])
+  drawCanvas()
+}
+
+onMounted(initCanvas)
+</script>

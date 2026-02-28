@@ -39,6 +39,7 @@ export default {
             dark: '#99BF00',
           },
   
+          
           // Accent 2: Ineos Red (สีแดงแห่งการตัดสินใจ/ความเร็ว)
           accent2: {
             lighter: '#FFB2C4',
