@@ -1,31 +1,58 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import AuthView from '@/views/auth/Auth.vue'
+import AppLayout from '@/layouts/AppLayout.vue'
 
 const routes = [
   {
     path: '/auth',
     name: 'auth',
     component: AuthView,
-    // ถ้า Login แล้ว ห้ามกลับมาหน้า Auth อีก (Redirect ไป Dashboard แทน)
     beforeEnter: (to, from, next) => {
       const authStore = useAuthStore()
-      if (authStore.token) next({ name: 'dashboard' })
+      if (authStore.token) next({ name: 'board' })
       else next()
     }
   },
   {
     path: '/dashboard',
     name: 'dashboard',
-    // ใช้ Lazy Loading เพื่อความเร็วแบบ McLaren (โหลดเฉพาะตอนจะใช้)
     component: () => import('@/views/Dashboard.vue'),
     meta: { requiresAuth: true }
   },
   {
     path: '/',
-    redirect: '/auth'
+    component: AppLayout,
+    meta: { requiresAuth: true },
+    redirect: () => (useAuthStore().token ? { name: 'board' } : { name: 'auth' }),
+    children: [
+      {
+        path: 'board',
+        name: 'board',
+        component: () => import('@/views/Board.vue'),
+      },
+      {
+        path: 'board/:projectId',
+        name: 'board-project',
+        component: () => import('@/views/Board.vue'),
+      },
+      {
+        path: 'projects',
+        name: 'projects',
+        component: () => import('@/views/ProjectList.vue'),
+      },
+      {
+        path: 'stats',
+        name: 'stats',
+        component: () => import('@/views/Stats.vue'),
+      },
+      {
+        path: 'profile',
+        name: 'profile',
+        component: () => import('@/views/Profile.vue'),
+      },
+    ],
   },
-  // Catch-all route สำหรับหน้า 404
   {
     path: '/:pathMatch(.*)*',
     redirect: '/auth'

@@ -1,10 +1,10 @@
 <template>
   <div class="flex flex-col items-center justify-center space-y-4">
     <canvas ref="canvas"
-      class="touch-none cursor-crosshair bg-background rounded-3xl border border-border-light shadow-inner"
+      class="touch-none cursor-crosshair bg-surface rounded-2xl border border-border shadow-inner"
       @mousedown="startDrawing" @mousemove="draw" @mouseup="stopDrawing" @touchstart="startDrawing" @touchmove="draw"
       @touchend="stopDrawing"></canvas>
-    <button @click="resetPattern" class="text-[10px] text-primary font-bold uppercase tracking-widest hover:underline">
+    <button type="button" @click="resetPattern" class="text-xs font-medium text-accent hover:underline">
       Clear Pattern
     </button>
   </div>
@@ -22,12 +22,12 @@ const isDrawing = ref(false)
 const points = reactive([]) // เก็บพิกัดจุด 9 จุด
 const selectedPoints = ref([]) // เก็บ index ของจุดที่ลากผ่าน
 
-// --- ตั้งค่าสีตามระบบ ---
+// --- Ultra Minimalist (โทนกราไฟต์) ---
 const colors = {
-  dotDefault: '#404040',    // border-light
-  dotActive: '#CCFF00',     // accent (Electric Lime)
-  line: '#00A19B',          // primary (Petronas Teal)
-  glow: 'rgba(0, 161, 155, 0.5)' 
+  dotDefault: '#D1D5DB',
+  dotActive: '#111827',
+  line: '#111827',
+  glow: 'rgba(17, 24, 39, 0.2)'
 }
 
 const initCanvas = () => {
@@ -91,9 +91,8 @@ const drawCanvas = (currentX = null, currentY = null) => {
     v.fill()
 
     if (isActive) {
-      // เพิ่ม Glow ให้จุดที่ถูกเลือก (Electric Lime)
-      v.shadowBlur = 15
-      v.shadowColor = 'rgba(204, 255, 0, 0.6)'
+      v.shadowBlur = 8
+      v.shadowColor = 'rgba(17, 24, 39, 0.3)'
       v.beginPath()
       v.arc(p.x, p.y, 4, 0, Math.PI * 2)
       v.fillStyle = '#FFFFFF'

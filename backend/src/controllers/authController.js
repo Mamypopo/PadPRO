@@ -32,7 +32,14 @@ export const handleLogin = async (req, res, next) => {
     res.json({
       success: true,
       token,
-      user: { id: user.id, username: user.username }
+      user: {
+        id: user.id,
+        username: user.username,
+        avatarUrl: user.avatarUrl,
+        level: user.level,
+        currentXp: user.currentXp,
+        totalTasksCompleted: user.totalTasksCompleted,
+      },
     });
   } catch (error) {
     next(error);

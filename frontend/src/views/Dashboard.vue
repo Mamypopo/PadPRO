@@ -1,7 +1,7 @@
 <template>
     <div class="p-10 bg-background min-h-screen text-text-primary">
       <h1 class="text-4xl font-black italic">DASHBOARD <span class="text-primary text-xl">CONNECTED</span></h1>
-      <button @click="handleLogout" class="mt-4 px-6 py-2 bg-error rounded-xl text-white">Logout</button>
+      <button @click="handleLogout" class="mt-4 px-6 py-2 bg-error text-surface rounded-xl">Logout</button>
     </div>
   </template>
   

@@ -1,165 +1,236 @@
 <template>
-  <div class="min-h-screen bg-background flex items-center justify-center p-4 font-sans text-text-primary">
-    <div class="w-full max-w-md bg-surface border border-border-light rounded-[2.5rem] p-10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative overflow-hidden">
-      
-      <div class="absolute -top-24 -right-24 w-48 h-48 bg-primary/10 blur-[100px] rounded-full"></div>
+  <div class="min-h-screen bg-pearl flex items-center justify-center p-4 font-sans">
+    <!-- Ambient glow -->
+    <div class="fixed inset-0 pointer-events-none overflow-hidden" aria-hidden="true">
+      <div class="absolute top-0 -left-1/4 w-1/2 h-1/2 bg-border rounded-full blur-[120px] opacity-50" />
+      <div class="absolute bottom-0 right-0 w-1/2 h-1/2 bg-border rounded-full blur-[100px] opacity-30" />
+    </div>
 
-      <div class="text-center mb-10">
-        <div class="inline-block p-4 bg-surface-light border border-primary/30 rounded-3xl mb-4 shadow-teal-glow">
-          <Rocket class="text-primary" :size="32" />
+    <div class="relative z-10 w-full max-w-md rounded-2xl bg-surface-glass backdrop-blur-lg border border-border shadow-sm p-8 md:p-10">
+      <div class="text-center mb-8">
+        <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-accent text-surface mb-4">
+          <Rocket :size="28" />
         </div>
-        <h1 class="text-4xl font-black italic tracking-tighter uppercase">
-          <span class="text-transparent bg-clip-text bg-accent">Pad</span><span class="text-text-primary">PRO</span>
+        <h1 class="text-2xl font-bold tracking-tight text-text-primary">
+          Pad<span class="font-black">PRO</span>
         </h1>
-        <p class="text-[10px] font-bold text-text-tertiary tracking-[0.4em] mt-2 uppercase">Strategy Board</p>
+        <p class="text-xs font-medium text-text-secondary tracking-widest uppercase mt-1">
+          Strategy Board
+        </p>
       </div>
 
-      <div class="flex p-1.5 bg-background border border-border rounded-2xl mb-8">
-        <button @click="isLogin = true" :class="[
-          'flex-1 py-3 text-xs font-black uppercase tracking-widest rounded-xl transition-all duration-500',
-          isLogin ? 'bg-primary text-background shadow-lg' : 'text-text-tertiary hover:text-primary/70'
-        ]">
+      <div class="flex p-1 bg-surface-light rounded-xl mb-6">
+        <button
+          type="button"
+          :class="[
+            'flex-1 py-2.5 text-sm font-semibold rounded-lg transition-all duration-200',
+            isLogin
+              ? 'bg-surface text-text-primary shadow-sm'
+              : 'text-text-secondary hover:text-text-primary'
+          ]"
+          @click="isLogin = true"
+        >
           Login
         </button>
-        <button @click="isLogin = false" :class="[
-          'flex-1 py-3 text-xs font-black uppercase tracking-widest rounded-xl transition-all duration-500',
-          !isLogin ? 'bg-primary text-background shadow-lg' : 'text-text-tertiary hover:text-primary/70'
-        ]">
+        <button
+          type="button"
+          :class="[
+            'flex-1 py-2.5 text-sm font-semibold rounded-lg transition-all duration-200',
+            !isLogin
+              ? 'bg-surface text-text-primary shadow-sm'
+              : 'text-text-secondary hover:text-text-primary'
+          ]"
+          @click="isLogin = false"
+        >
           Register
         </button>
       </div>
 
-      <form @submit.prevent="handleSubmit" class="space-y-6">
-        <div class="group">
-          <label class="block text-[10px] font-black text-text-tertiary uppercase tracking-[0.25em] mb-2 ml-1 group-focus-within:text-accent">
+      <form @submit.prevent="handleSubmit" class="space-y-5">
+        <div>
+          <label class="block text-xs font-semibold text-text-secondary uppercase tracking-wider mb-1.5">
             Username
           </label>
-          <div class="relative flex items-center">
-            <div class="absolute left-4 text-text-tertiary group-focus-within:text-accent transition-colors">
-              <User :size="20" />
+          <div class="relative">
+            <div class="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-secondary">
+              <User :size="18" />
             </div>
-            <input v-model="form.username" type="text"
-              class="w-full bg-surface-light border border-border text-text-primary p-4 pl-12 rounded-2xl focus:border-accent focus:ring-1 focus:ring-accent outline-none transition-all placeholder:text-text-disabled/20 font-medium"
-              placeholder="Your username" required />
+            <input
+              v-model="form.username"
+              type="text"
+              class="w-full bg-surface border border-border text-text-primary placeholder:text-text-secondary/60 pl-10 pr-4 py-3 rounded-xl focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-all"
+              placeholder="Your username"
+              required
+            >
           </div>
         </div>
 
-        <div class="pt-2">
-          <div class="flex justify-between items-center mb-4">
-            <span class="text-[10px] font-black text-text-tertiary uppercase tracking-[0.25em] ml-1">Security</span>
-            <div class="flex gap-2">
-              <button type="button" @click="authMethod = 'password'" :class="[
-                'text-[9px] px-3 py-1.5 rounded-lg border-2 transition-all font-black uppercase',
-                authMethod === 'password' ? 'border-primary text-primary bg-primary/5' : 'border-border text-text-tertiary'
-              ]">
+        <div>
+          <div class="flex justify-between items-center mb-2">
+            <span class="text-xs font-semibold text-text-secondary uppercase tracking-wider">Security</span>
+            <div class="flex gap-1.5">
+              <button
+                type="button"
+                :class="[
+                  'text-xs px-2.5 py-1 rounded-lg font-medium transition-all',
+                  authMethod === 'password'
+                    ? 'bg-accent text-surface'
+                    : 'bg-surface-light text-text-secondary hover:text-text-primary'
+                ]"
+                @click="authMethod = 'password'"
+              >
                 Password
               </button>
-              <button type="button" @click="authMethod = 'pattern'" :class="[
-                'text-[9px] px-3 py-1.5 rounded-lg border-2 transition-all font-black uppercase',
-                authMethod === 'pattern' ? 'border-primary text-primary bg-primary/5' : 'border-border text-text-tertiary'
-              ]">
+              <button
+                type="button"
+                :class="[
+                  'text-xs px-2.5 py-1 rounded-lg font-medium transition-all',
+                  authMethod === 'pattern'
+                    ? 'bg-accent text-surface'
+                    : 'bg-surface-light text-text-secondary hover:text-text-primary'
+                ]"
+                @click="authMethod = 'pattern'"
+              >
                 Pattern
               </button>
             </div>
           </div>
 
-          <div v-if="authMethod === 'password'" class="group animate-in fade-in zoom-in-95 duration-500">
-            <div class="relative flex items-center">
-              <div class="absolute left-4 text-text-tertiary group-focus-within:text-primary transition-colors">
-                <Lock :size="20" />
-              </div>
-              <input v-model="form.password" type="password"
-                class="w-full bg-surface-light border border-border text-text-primary p-4 pl-12 rounded-2xl focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-text-disabled/20 shadow-inner font-medium"
-                placeholder="Password" />
+          <div v-if="authMethod === 'password'" class="relative">
+            <div class="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-secondary">
+              <Lock :size="18" />
             </div>
+            <input
+              v-model="form.password"
+              type="password"
+              class="w-full bg-surface border border-border text-text-primary placeholder:text-text-secondary/60 pl-10 pr-4 py-3 rounded-xl focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-all"
+              :placeholder="isLogin ? 'Password' : 'Choose a password (optional with Pattern)'"
+            >
           </div>
-          
 
-          <div v-else class="animate-in fade-in zoom-in-95 duration-500">
-  <PatternLock v-model="form.pattern" />
-</div>
+          <div v-else>
+            <PatternLock v-model="form.pattern" />
+          </div>
         </div>
 
-        <button type="submit" class="group relative w-full py-5 font-black rounded-2xl 
-          transition-all duration-300 mt-4 tracking-[0.3em] overflow-hidden 
-          border border-white/10
-          bg-primary text-white shadow-[0_0_15px_rgba(0,161,155,0.4)]
-          hover:bg-accent hover:text-background hover:shadow-[0_0_25px_rgba(204,255,0,0.6)]
-          active:scale-[0.97]">
-
-          <span class="relative z-10 flex items-center justify-center gap-2 drop-shadow-lg uppercase">
-            <LogIn :size="18" />
-            {{ isLogin ? 'Login' : 'Register' }}
-          </span>
-
-          <div class="absolute inset-0 bg-white/30 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 skew-x-12">
-          </div>
+        <button
+          type="submit"
+          :disabled="submitting"
+          class="w-full py-3.5 rounded-xl font-semibold text-surface bg-accent hover:bg-accent-hover focus:ring-2 focus:ring-accent/30 outline-none transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+        >
+          <LogIn v-if="!submitting" :size="18" />
+          <span v-if="submitting">Please wait...</span>
+          <span v-else>{{ isLogin ? 'Login' : 'Register' }}</span>
         </button>
       </form>
 
-      <div class="mt-8 pt-6 border-t border-border/50 text-center">
-        <p class="text-[9px] text-text-tertiary font-medium uppercase tracking-[0.3em]">
-          PadPRO Todo • <span class="text-primary/70">v1.0</span>
-        </p>
-      </div>
+      <p class="mt-6 pt-4 border-t border-border text-center text-xs text-text-secondary">
+        PadPRO · Gamified Kanban
+      </p>
     </div>
   </div>
 </template>
 
 <script>
-import { Zap, User, Lock, FingerprintPattern, Power ,Rocket, Fingerprint ,LogIn} from 'lucide-vue-next';
+import { User, Lock, Rocket, LogIn } from 'lucide-vue-next'
 import { mapActions } from 'pinia'
 import { useAuthStore } from '@/stores/auth'
 import { authApi } from '@/api/auth'
-import PatternLock from '@/components/PatternLock.vue';
+import Swal from 'sweetalert2'
+import PatternLock from '@/components/PatternLock.vue'
 
 export default {
+  name: 'AuthView',
 
   components: {
-    Zap,
     User,
-    PatternLock,
     Lock,
-    FingerprintPattern,
-    Power,
     Rocket,
-    Fingerprint,
-    LogIn
+    LogIn,
+    PatternLock,
   },
 
   data() {
     return {
       isLogin: true,
       authMethod: 'password',
+      submitting: false,
       form: {
         username: '',
         password: '',
-        pattern: ''
-      }
+        pattern: '',
+      },
     }
   },
+
   methods: {
     ...mapActions(useAuthStore, ['login']),
 
     async handleSubmit() {
       const payload = {
-        username: this.form.username,
-        ...(this.authMethod === 'password' ? { password: this.form.password } : { pattern: this.form.pattern })
-      };
+        username: this.form.username.trim(),
+        ...(this.authMethod === 'password'
+          ? { password: this.form.password }
+          : { pattern: this.form.pattern }),
+      }
 
+      if (this.isLogin && this.authMethod === 'password' && !payload.password) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Password required',
+          text: 'Please enter your password to login.',
+          confirmButtonColor: '#111827',
+        })
+        return
+      }
+
+      if (!this.isLogin && this.authMethod === 'password' && !payload.password && !payload.pattern) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Security required',
+          text: 'Please set either a password or a pattern.',
+          confirmButtonColor: '#111827',
+        })
+        return
+      }
+
+      this.submitting = true
       try {
         if (this.isLogin) {
-          await this.login(payload);
-          this.$router.push('/dashboard');
+          await this.login(payload)
+          await Swal.fire({
+            icon: 'success',
+            title: 'Welcome back',
+            text: 'Redirecting to your board...',
+            timer: 1200,
+            showConfirmButton: false,
+            timerProgressBar: true,
+          })
+          this.$router.push('/board')
         } else {
-          await authApi.register(payload);
-          this.isLogin = true;
-          alert('Welcome to the Team! Please login.');
+          await authApi.register(payload)
+          await Swal.fire({
+            icon: 'success',
+            title: 'Account created',
+            text: 'Please login with your credentials.',
+            confirmButtonColor: '#111827',
+          })
+          this.isLogin = true
+          this.form.password = ''
+          this.form.pattern = ''
         }
       } catch (err) {
-        alert(err.response?.data?.error || 'System Error: Access Denied');
+        const msg = err.response?.data?.error || 'Something went wrong. Please try again.'
+        Swal.fire({
+          icon: 'error',
+          title: this.isLogin ? 'Login failed' : 'Registration failed',
+          text: msg,
+          confirmButtonColor: '#111827',
+        })
+      } finally {
+        this.submitting = false
       }
-    }
-  }
+    },
+  },
 }
 </script>
